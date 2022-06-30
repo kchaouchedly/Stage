@@ -1,18 +1,27 @@
 const express = require('express');
-const { default: mongoose } = require('mongoose');
-const app = express(); 
-const mogoose = require ('mongoose'); 
-const User = require('./models/User');
-mongoose.connect('mongodb+srv://chedly:chedly@cluster0.qpvvq.mongodb.net/?retryWrites=true&w=majority',(err,done)=>{
-    if(err){
-        console.log(err);
-    }
-if(done){
-console.log("connected to database  ");
-}
-})
-app.listen(5000,()=>console.log("serveur en marche"));
+const dotenv = require('dotenv');
+const morgan = require('morgan');
+const bodyparser = require("body-parser");
+const path = require('path');
+const connectDB =require('./server/database/connection'); 
+
+const app = express();
 
 
 
 
+dotenv.config( { path : 'config.env'} )
+const PORT = process.env.PORT || 8080
+app.use(morgan('tiny'));
+connectDB();
+
+app.use(bodyparser.urlencoded({ extended : true}))
+app.set("view engine", "ejs")
+app.use('/css', express.static(path.resolve(__dirname, "assets/css")))
+app.use('/img', express.static(path.resolve(__dirname, "assets/img")))
+app.use('/js', express.static(path.resolve(__dirname, "assets/js")))
+
+  
+app.use('',require("./server/routes/router"))     
+
+app.listen(PORT, ()=> { console.log(`Server is running on http://localhost:${PORT}`)});
